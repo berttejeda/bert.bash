@@ -32,7 +32,7 @@ function bert.bash.install() {
   if [[ ! -d "${HOME}/.bert.bash" ]];then
       echo 'Installing bert.bash'
       git clone $BERT_BASH_GIT_URL "${BERT_BASH_HOME}"
-      echo "source ${BERT_BASH_HOME}/.installer.sh" >> "${HOME}/.bash_profile"
+      echo "source '${BERT_BASH_HOME}/.installer.sh'" >> "${HOME}/.bash_profile"
   elif [[ (-d "${BERT_BASH_HOME}") && ($BERT_BASH_UPDATE) ]];then
       echo -n "updating bert.bash ... "
       pushd "${PWD}"
