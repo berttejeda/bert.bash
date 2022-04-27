@@ -74,7 +74,7 @@ file.decrypt(){
 	TEMPFILE=$(mktemp -t $(whoami)XXX || mktemp -t $(whoami)ZZZ)
     eval openssl rsautl -decrypt -inkey "${private_key}" -in "${target_file}" -out "${TEMPFILE}"
     if [[ $edit ]];then
-    	subl -w ${TEMPFILE}
+    	${EDITOR_COMMAND} ${TEMPFILE}
 	    cat ${TEMPFILE} > ${target_file}
 	    if [[ -z $no_encrypt ]];then
 		    file.encrypt --public-key "${public_key_pem}" --temp-file "${TEMPFILE}" --vault-file "${target_file}"

@@ -138,14 +138,3 @@ document.markdown2html(){
   fi
 
 }
-
-# sublime text
-subl() { 
-  if [[ $1 == '-w' ]];then
-    "${subl_exe_path}" -a ${*}
-  else
-    "${subl_exe_path}" -a "${*}"
-  fi
-}
-
-export EDITOR="'${subl_exe_path}' -w"

@@ -6,6 +6,17 @@ elif [[ "$OSTYPE" =~ .*msys.* ]];then
   os_is_windows=true
 fi
 
+if [[ -n $os_is_windows ]];then
+  if [[ -z $subl_exe_path ]];then
+    export subl_exe_path="C:\Program Files\Sublime Text 3\subl.exe"
+  else 
+    export subl_exe_path=$(which subl)
+  fi
+fi  
+
+export EDITOR_COMMAND="${EDITOR_COMMAND-'${subl_exe_path}' -w}"
+export EDITOR_COMMAND_WORKSPACE="${EDITOR_COMMAND_WORKSPACE-'${subl_exe_path}' -a}"
+
 # Text formatting
 text.format(){
 
