@@ -9,12 +9,12 @@ function aws.profile.login(){
 
   USAGE="""
   ${FUNCNAME[0]}
-    -p <profile_name>
+    -p <aws_profile_name>
     --help
   """
 
   while (( "$#" )); do
-      if [[ "$1" =~ ^-p$ ]]; then profile_name=$2;fi    
+      if [[ "$1" =~ ^-p$ ]]; then aws_profile_name=$2;fi    
       if [[ "$1" =~ ^--help$ ]]; then help=true;fi    
       shift
   done
@@ -24,15 +24,17 @@ function aws.profile.login(){
     return
   fi
 
-  if $(aws configure list-profiles | grep -q "${profile_name}" 2>/dev/null);then
-    aws sso login --profile "${profile_name}"
-    export AWS_PROFILE="${profile_name}"
+  echo "Logging into ${aws_profile_name?'Must specify profile name (-p)'}"
+
+  if $(aws configure list-profiles | grep -q "${aws_profile_name}" 2>/dev/null);then
+    aws sso login --profile "${aws_profile_name}"
+    export AWS_PROFILE="${aws_profile_name}"
     return
   else
-    echo "The specified profile '${profile_name}' does not exist"
+    echo "The specified profile '${aws_profile_name}' does not exist"
     return 1
   fi
-
+  unset aws_profile_name
 }
 
 function aws.secrets.create(){
@@ -45,13 +47,15 @@ function aws.secrets.create(){
     -n <secret_name>
     -d <secret_description>
     -s <secret_string>
+    [-p <aws_profile>]
     --help
   """
 
   while (( "$#" )); do
       if [[ "$1" =~ ^-n$ ]]; then secret_name=$2;fi    
       if [[ "$1" =~ ^-d$ ]]; then secret_description=$2;fi    
-      if [[ "$1" =~ ^-i$ ]]; then secret_string=$2;fi    
+      if [[ "$1" =~ ^-s$ ]]; then secret_string=$2;fi    
+      if [[ "$1" =~ ^-p$ ]]; then aws_profile_arg="--profile ${2}";fi    
       if [[ "$1" =~ ^--help$ ]]; then help=true;fi    
       shift
   done
@@ -61,9 +65,11 @@ function aws.secrets.create(){
     return
   fi
 
-  aws secretsmanager create-secret --name ${secret_name} \
-      --description "${secret_description}" \
-      --secret-string "${secret_string}"
+  echo "Creating ${secret_name?'Must specify the secrent name (-n)'}"
+  aws ${aws_profile_arg} secretsmanager create-secret \
+  --name ${secret_name} \
+  --description "${secret_description?'Must specify description for the secrent (-d)'}" \
+  --secret-string "${secret_string?'Must specify the value for the secret (-s)'}"
 }
 
 function aws.ec2.list(){
