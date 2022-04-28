@@ -7,15 +7,20 @@ elif [[ "$OSTYPE" =~ .*msys.* ]];then
 fi
 
 if [[ -n $os_is_windows ]];then
-  if [[ -z $subl_exe_path ]];then
-    export subl_exe_path="C:\Program Files\Sublime Text 3\subl.exe"
-  else 
-    export subl_exe_path=$(which subl)
+  if [[ -z $EDITOR_PATH ]];then
+    export EDITOR_PATH="C:\Program Files\Sublime Text 3\subl.exe"
   fi
+else
+  export EDITOR_PATH=${EDITOR_PATH-$(which subl)}
 fi  
 
-export EDITOR_COMMAND="${EDITOR_COMMAND-'${subl_exe_path}' -w}"
-export EDITOR_COMMAND_WORKSPACE="${EDITOR_COMMAND_WORKSPACE-'${subl_exe_path}' -a}"
+export EDITOR_COMMAND="${EDITOR_COMMAND-'${EDITOR_PATH}' -a}"
+export EDITOR_COMMAND_W_WAIT="${EDITOR_COMMAND_W_WAIT-'${EDITOR_PATH}' -w}"
+
+# sublime text
+function subl() { 
+  eval "${EDITOR_COMMAND}" ${*}
+}
 
 # Text formatting
 text.format(){
