@@ -40,7 +40,8 @@ ${HOME}/AppData/Roaming/npm
 /c/Progra~2/MIB055~1/2017/BuildTools/MSBuild/15.0/Bin
 /c/Progra~2/MIB055~1/2017/BuildTools/MSBuild/15.0/Bin/Roslyn
 ${HOME}/.cargo/bin
- $HOME/ProgramData/nvm
+${HOME}/ProgramData/nvm
+${HOME}/.local/bin
 """
 exclusions="/c/Program Files/Git/bin/git"
 NEW_PATH=$(echo "${PATHS}" | tr ':' '\n' | egrep -v "${exclusions}" | sort -u | egrep '^/' | tr '\n' ':')
