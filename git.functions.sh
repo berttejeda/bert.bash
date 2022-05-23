@@ -1,5 +1,65 @@
 PS1='\[\033[0;32m\]\[\033[0m\033[0;32m\]\u\[\033[0;36m\] @ \w\[\033[0;32m\]\n[$(git branch 2>/dev/null | grep "^*" | cut -c 2-)\[\033[0;32m\] ]\[\033[0m\033[0;32m\] \$\[\033[0m\033[0;32m\]\[\033[0m\]'
 
+git.configure.global.hooks.only_pr(){
+
+  USAGE="""
+  Description: Sets the global pre-commit hook to disallow
+  merging directly into branch, according to branch name pattern
+  Usage:
+    ${FUNCNAME[0]} [--branch-pattern|-p <pattern1|pattern2|pattern3>]
+  """
+
+  # args
+  num_args=$#
+  allargs=$*
+  
+  while (( "$#" )); do
+    if [[ "$1" =~ ^--branch-pattern$|^-p$ ]]; then branch_pattern="${2}";shift;fi
+    if [[ "$1" =~ ^--help$|^-h$ ]]; then help=true;fi
+    shift
+  done
+  
+  # Display help if applicable
+  if [[ (-n $help) || (-z $branch_pattern) ]];then 
+    echo -e "${USAGE}"
+    return
+  fi
+
+  global_hooks_dir="${HOME}/.githooks"
+  global_pre_commit_hook="${global_hooks_dir}/pre-commit"
+
+  echo "Setting git global hooks dir to ${global_hooks_dir}"
+  git config --global core.hooksPath "${global_hooks_dir}"
+  echo "Checking for global hooks dir: ${global_hooks_dir}"
+  if [[ ! -d "${global_hooks_dir}" ]];then
+    echo "Creating global hooks dir: ${global_hooks_dir}"
+    mkdir -p "${global_hooks_dir}"
+  else
+    echo "Global hooks dir already present"
+  fi
+
+ONLY_PR_CONTENT="""#!/usr/bin/env bash
+branch=\"\$(git rev-parse --abbrev-ref HEAD)\"
+
+branch_pattern=\"${branch_pattern}\"
+
+if [[ \"\${branch}\" =~ \$branch_pattern ]]; then
+  echo \"PRE-COMMIT VIOLATION: You can't commit directly to branches matching \${branch_pattern}\"
+  exit 1
+fi
+"""
+
+echo "Checking for global pre-commit hook: ${global_pre_commit_hook}"
+
+if [[ ! -f "${global_pre_commit_hook}" ]];then
+  echo "Creating global pre-commit hook: ${global_pre_commit_hook}"
+  echo -e "${ONLY_PR_CONTENT}" > "${global_pre_commit_hook}"
+else
+  echo "Global pre-commit hook file already present: ${global_pre_commit_hook}"
+fi
+
+}
+
 git.set.tracking(){
 
 
