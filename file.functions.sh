@@ -598,3 +598,62 @@ locate32.find.dupes(){
     echo "${file_spec}:${num_hits}"
   done
 }
+
+files.batch() {
+
+  # args
+  numArgs=$#
+  allArgs=$*
+
+  USAGE="""
+  ${FUNCNAME[0]}
+    -p <path/to/dir>
+    -b <batchSize>
+    -n <subFolderName>
+    --dry
+    --help
+  """
+
+  while (( "$#" )); do
+      if [[ "$1" =~ ^--path$|^-p$ ]]; then local DIR=$2;fi    
+      if [[ "$1" =~ ^--batch-size$|^-b$ ]]; then local BATCH_SIZE=$2;fi    
+      if [[ "$1" =~ ^--subfolder-name$|^-n$ ]]; then local SUBFOLDER_NAME=$2;fi 
+      if [[ "$1" =~ ^--help$ ]]; then local help=true;shift;fi   
+      if [[ "$1" =~ .*--dry.* ]]; then local DRY_RUN="true";local PREFIX=echo;shift;fi
+      shift
+  done
+  
+  # Display help if applicable
+  if [[ (-n $help) || ($numArgs -lt 1) ]];then 
+    echo -e "${USAGE}"
+    return
+  fi
+
+  COUNTER=1
+
+  echo "Distributing files in batches of ${BATCH_SIZE} to ${DIR}/${SUBFOLDER_NAME}_*"
+
+  while [ `find $DIR -maxdepth 1 -type f| wc -l` -gt $BATCH_SIZE ] ; do
+    DID_RUN=true
+    NEW_DIR=$DIR/${SUBFOLDER_NAME}${COUNTER}
+    $PREFIX mkdir $NEW_DIR
+    if [[ $PREFIX == "dry" ]];then
+      $PREFIX find $DIR -maxdepth 1 -type f \| head -n $BATCH_SIZE \| xargs -I {} mv {} $NEW_DIR
+    else
+      find $DIR -maxdepth 1 -type f | head -n $BATCH_SIZE | xargs -I {} mv {} $NEW_DIR
+    fi
+    let COUNTER++
+  if [ `find $DIR -maxdepth 1 -type f| wc -l` -le $BATCH_SIZE ] ; then
+    $PREFIX mkdir $NEW_DIR
+    if [[ $PREFIX == "dry" ]];then
+      $PREFIX find $DIR -maxdepth 1 -type f \| head -n $BATCH_SIZE \| xargs -I {} mv {} $NEW_DIR
+    else
+      find $DIR -maxdepth 1 -type f | head -n $BATCH_SIZE | xargs -I {} mv {} $NEW_DIR
+    fi
+  fi
+  done
+
+  if [[ -z $DID_RUN ]];then
+    echo "Warning: Did not batch any files, as the number of files in the target are less than the batch size of ${BATCH_SIZE}"
+  fi
+}
