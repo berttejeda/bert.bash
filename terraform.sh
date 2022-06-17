@@ -1,3 +1,8 @@
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+if [[ ! -d "${TF_PLUGIN_CACHE_DIR}" ]];then
+  mkdir -p "${TF_PLUGIN_CACHE_DIR}"
+fi
+
 function tvm()
 { 
   TERRAFORM_BIN=$(which terraform)
