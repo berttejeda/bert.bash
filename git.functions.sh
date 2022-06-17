@@ -39,9 +39,16 @@ git.configure.global.hooks.only_pr(){
   fi
 
 ONLY_PR_CONTENT="""#!/usr/bin/env bash
+IGNORE_PRECOMMIT=\${IGNORE_PRECOMMIT-false}
+
+if [[ \$IGNORE_PRECOMMIT == "true" ]];then
+  exit 0
+fi
+
 branch=\"\$(git rev-parse --abbrev-ref HEAD)\"
 
 branch_pattern=\"${branch_pattern}\"
+
 
 if [[ \"\${branch}\" =~ \$branch_pattern ]]; then
   echo \"PRE-COMMIT VIOLATION: You can't commit directly to branches matching \${branch_pattern}\"
