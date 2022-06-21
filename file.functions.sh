@@ -74,7 +74,7 @@ for md in $(find ~/Documents/workspace/md -maxdepth 2 -type f -iname '*.md'); do
   eval "function ${namespace}${method}(){ ${EDITOR_COMMAND} ${md} \${1}; }"
 done
 
-biggest(){ du -sk ./* | sort -n | awk 'BEGIN{ pref[1]="K"; pref[2]="M"; pref[3]="G";} { total = total + $1; x = $1; y = 1; while( x > 1024 ) { x = (x + 1023)/1024; y++; } printf("%g%s\t%s\n",int(x*10)/10,pref[y],$2); } END { y = 1; while( total > 1024 ) { total = (total + 1023)/1024; y++; } printf("Total: %g%s\n",int(total*10)/10,pref[y]); }'; }
+biggest(){ du -ha --max-depth=1 . | sort -n -r | egrep -v '[0-9]+K'; }
 disk.unmount () { sudo diskutil unmountDisk $1 ;}
 disk.list () { sudo diskutil list ;}
 disk.erase () { if [ $# -lt 1 ]; then echo "Usage: ${FUNCNAME[0]} <VOLName> <disk#>";else sudo diskutil eraseDisk JHFS+ $1 $2;fi ;}
