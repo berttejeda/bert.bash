@@ -1,11 +1,3 @@
-KUBECONFIGS="""
-~/.kube/pwc-sky-dev-kubeconfig
-~/.kube/config
-~/.kube/pwc-fso-sandbox-seed-config
-~/.kube/pwc-sky-qa-config
-~/.kube/sky-sales-staging-config"""
-KUBECONFIG=${KUBECONFIGS}
-
 gcloud.initialize(){
 
 	echo "Initializing gcloud aliases ..."
@@ -21,18 +13,20 @@ gcloud.initialize(){
 	  alias "${namespace}.${account}=gcloud.switch ${account} $*"
 	done
 	
+	BINARY=brew
+	if [[ ("$OSTYPE" =~ .*darwin.*) && ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null) || $(which $BINARY))  ]]; then
+		# enable bash completion for gcloud
+		sdk_path=$(brew info --cask google-cloud-sdk | grep -oiw '\''.*\/usr.*k' | head -1)
+		inc=${sdk_path}/latest/google-cloud-sdk/completion.bash.inc
+		if ! [[ -x "${inc}" ]];then
+			sudo chmod +x "${inc}"
+		fi
+		[ -f "${inc}" ] && source "${inc}" || true
+	fi
+
 }
 
-BINARY=brew
-if [[ ("$OSTYPE" =~ .*darwin.*) && ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null) || $(which $BINARY))  ]]; then
-	# enable bash completion for gcloud
-	sdk_path=$(brew info --cask google-cloud-sdk | grep -oiw '\''.*\/usr.*k' | head -1)
-	inc=${sdk_path}/latest/google-cloud-sdk/completion.bash.inc
-	if ! [[ -x "${inc}" ]];then
-		sudo chmod +x "${inc}"
-	fi
-	[ -f "${inc}" ] && source "${inc}" || true
-fi
+
 
 gcloud.cluster.create(){
 	if [[ ($# -lt 2) ]]; then 
