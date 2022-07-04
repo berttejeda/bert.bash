@@ -63,5 +63,5 @@ function bert.bash.install() {
 bert.bash.install
 
 echo -e "${yellow}Wassup home skillet!${reset}"
-echo -e "You are logged in as ${bold}${USER-USERNAME}${reset}"
+echo -e "You are logged in as ${bold}${USER-$USERNAME}${reset}"
 echo -e "Today's date is `date "+%A %d.%m.%Y %H:%M, %Z %z"`"
