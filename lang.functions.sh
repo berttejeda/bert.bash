@@ -175,6 +175,16 @@ print(yaml.dump(yaml.load(json.dumps(json.loads(open('${1}').read()))), default_
   python -c "$process"
 }
 
+yaml.to_json(){
+  if [[ "$*" =~ .*--help.* ]]; then echo -e "usage: ${FUNCNAME[0]} [path/to/file.json]";return 1;fi
+    process="import json;import os;import yaml;
+filepath = os.path.expanduser('${1}')
+content = open(filepath).read();
+yaml_content = yaml.safe_load(content);
+print(json.dumps(yaml_content))"
+  python -c "${process}"
+}
+
 # golang
 
 if [[ $os_is_osx ]];then
