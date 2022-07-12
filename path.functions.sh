@@ -43,6 +43,7 @@ ${HOME}/.cargo/bin
 ${HOME}/ProgramData/nvm
 ${HOME}/.local/bin
 ${HOME}/.githooks
+/c/Progra~1/Amazon/AWSSAMCLI/bin
 """
 exclusions="/c/Program Files/Git/bin/git"
 NEW_PATH=$(echo "${PATHS}" | tr ':' '\n' | egrep -v "${exclusions}" | sort -u | egrep '^/' | tr '\n' ':')
