@@ -185,22 +185,18 @@ print(json.dumps(yaml_content))"
   python -c "${process}"
 }
 
-# golang
-
-if [[ $os_is_osx ]];then
-  export GOPATH=$HOME/go
-  export GOROOT=/usr/local/opt/go/libexec
-  export PATH=$PATH:$GOPATH/bin
-  export PATH=$PATH:$GOROOT/bin
-fi
-
 go.init() {
   while (( "$#" )); do
     if [[ "$1" =~ .*--install.* ]]; then local INSTALL="true";fi    
-    if [[ "$1" =~ .*--build-hello.* ]]; then local BUILD_TEST="true";fi    
+    if [[ "$1" =~ .*--build-hello.* ]]; then local BUILD_HELLO="true";fi    
     shift
-  done   
-  if [ $BUILD_TEST ];then
+  done
+  if [[ -n $GOPATH ]];then
+    mkdir -p $GOPATH/src/github.com/${USER-$USERNAME}
+  fi
+  go get golang.org/x/tools/cmd/godoc
+  go get golang.org/x/tools/cmd/vet    
+  if [ $BUILD_HELLO ];then
     mkdir -p $GOPATH/rc/github.com/${GITHUB_USER}
     mkdir -p $GOPATH/src/github.com/${GITHUB_USER}/hello
     hello_world_src='''
