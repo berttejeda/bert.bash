@@ -80,3 +80,47 @@ function tvm()
 
   PATH="$(echo -e "$TERRAFORM_DIR/$1/:$PATH")"  
 } 
+
+alias tf=terraform
+
+function tf.plan.nocolor {
+  USAGE="""
+  Description: Outputs terraform plan to output file
+  Usage:
+    ${FUNCNAME[0]} [--plan-prefix|-pp] <plan_prefix>
+  Examples:
+    ${FUNCNAME[0]} -pp vpc-changes
+  """
+
+  # args
+  num_args=$#
+  allargs=$*
+  
+  while (( "$#" )); do
+    if [[ "$1" =~ ^--plan-name-prefix$|^-pp$ ]]; then plan_prefix="-${2}";shift;fi
+    if [[ "$1" =~ ^--help$|^-h$ ]]; then help=true;fi
+    shift
+  done
+  
+  # Display help if applicable
+  if [[ -n $help ]];then 
+    echo -e "${USAGE}"
+    return
+  fi
+
+  plan_prefix_w_branch="$(git rev-parse --abbrev-ref HEAD | head -1)"
+  if [[ -n $plan_prefix ]];then
+    effective_plan_prefix="${plan_prefix_w_branch}${plan_prefix}"
+  else
+    effective_plan_prefix="${plan_prefix_w_branch}"
+  fi
+  plan_file=${effective_plan_prefix}-plan-$(date +%Y-%m-%d-%H-%M).txt
+  echo "Saving output of 'terraform plan' to ${plan_file}"
+  terraform plan -no-color | tee ${plan_file}
+}
+
+function tf.init {
+  terraform init $@
+}
+
+alias tf=terraform
