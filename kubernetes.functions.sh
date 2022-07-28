@@ -10,7 +10,9 @@ if [[ $(type /usr/{,local/}{,s}bin/kubectl 2> /dev/null) || $(which kubectl 2> /
   k8s_namespaces=$(kubectl get namespaces -o custom-columns=NAME:metadata.name --no-headers 2>/dev/null)
   if [[ $? -eq 0 ]];then
     for k8s_context in ${k8s_contexts}; do
-        context="k.config.context.use";method=${k8s_context//-/.}
+        context="k.config.context.use";
+        method=${k8s_context//-/.}
+        method=${k8s_context//:/.}
         alias "${context}.${method}=kubectl config use-context ${k8s_context}"
     done
     for k8s_namespace in ${k8s_namespaces}; do
