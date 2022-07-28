@@ -1,4 +1,4 @@
- export KUBECONFIG=$(ls ~/.kube/*.yaml | tr '\n' ':')
+export KUBECONFIG=$(ls ~/.kube/*.yaml | tr '\n' ':')
  
 function k.aliases {
 if [[ $(type /usr/{,local/}{,s}bin/kubectl 2> /dev/null) || $(which kubectl 2> /dev/null) ]];then
