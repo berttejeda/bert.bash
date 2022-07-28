@@ -124,75 +124,77 @@ function tf.plan.nocolor {
   terraform plan -no-color $nargs | tee ${plan_file}
 }
 
-function tf.variables.sort {
-  USAGE="""
-  Description: Alphabetically sorts a terraform variables file according to variable names
-  Usage:
-    ${FUNCNAME[0]} [--vars-file|-f] <variables_file> --- <extra_args>
-  Examples:
-    ${FUNCNAME[0]} -f variables.tf
-  """
-
-  # args
-  num_args=$#
-  allargs=$*
-  plan_prefix=
-  
-  while (( "$#" )); do
-    if [[ "$1" =~ ^--vars-file$|^-f$ ]]; then vars_file="${2}";shift;fi
-    if [[ "$1" =~ ^--help$|^-h$ ]]; then help=true;fi
-    shift
-  done
-  
-  # Display help if applicable
-  if [[ -n $help ]];then 
-    echo -e "${USAGE}"
-    return
-  fi
-
-  if [[ $allargs =~ ' --- ' ]];then
-    nargs=${allargs##*---}
-    nargs=${nargs//--dry/}
-  fi
-  
-  echo "Sorting ${vars_file} ..."
-  
-    process="from __future__ import print_function
-import sys
-import re
-
-# this regex matches terraform variable definitions
-# we capture the variable name so we can sort on it
-pattern = r'(variable \")([^\"]+)(\" {[^{]+})'
-
-def process(content):
-    # sort the content (a list of tuples) on the second item of the tuple
-    # (which is the variable name)
-    matches = sorted(re.findall(pattern, content), key=lambda x: x[1])
-
-    # iterate over the sorted list and output them
-    for match in matches:
-        print(''.join(map(str, match)))
-
-        # don't print the newline on the last item
-        if match != matches[-1]:
-            print()
-
-
-# check if we're reading from stdin
-if not sys.stdin.isatty():
-    stdin = sys.stdin.read()
-    if stdin:
-        process(stdin)
-
-# process any filenames on the command line
-with open('${vars_file}') as f:
-  process(f.read())
-"
-  sorted_content=$(python -c "$process" | tr -d '\r')
-  echo "${sorted_content}" | tee ${vars_file}
-
-}
+# function tf.variables.sort {
+#   USAGE="""
+#   Description: Alphabetically sorts a terraform variables file according to variable names
+#   Usage:
+#     ${FUNCNAME[0]} [--vars-file|-f] <variables_file> --- <extra_args>
+#   Examples:
+#     ${FUNCNAME[0]} -f variables.tf
+#   """
+# 
+#   # args
+#   num_args=$#
+#   allargs=$*
+#   plan_prefix=
+#   
+#   while (( "$#" )); do
+#     if [[ "$1" =~ ^--vars-file$|^-f$ ]]; then vars_file="${2}";shift;fi
+#     if [[ "$1" =~ ^--help$|^-h$ ]]; then help=true;fi
+#     shift
+#   done
+#   
+#   # Display help if applicable
+#   if [[ -n $help ]];then 
+#     echo -e "${USAGE}"
+#     return
+#   fi
+# 
+#   if [[ $allargs =~ ' --- ' ]];then
+#     nargs=${allargs##*---}
+#     nargs=${nargs//--dry/}
+#   fi
+#   
+#   echo "Sorting ${vars_file} ..."
+#   hcltool.py ${vars_file} | jq . | json2hcl
+#   return
+#   
+#     process="from __future__ import print_function
+# import sys
+# import re
+# 
+# # this regex matches terraform variable definitions
+# # we capture the variable name so we can sort on it
+# pattern = r'(variable \")([^\"]+)(\" {[^{]+})'
+# 
+# def process(content):
+#     # sort the content (a list of tuples) on the second item of the tuple
+#     # (which is the variable name)
+#     matches = sorted(re.findall(pattern, content), key=lambda x: x[1])
+# 
+#     # iterate over the sorted list and output them
+#     for match in matches:
+#         print(''.join(map(str, match)))
+# 
+#         # don't print the newline on the last item
+#         if match != matches[-1]:
+#             print()
+# 
+# 
+# # check if we're reading from stdin
+# if not sys.stdin.isatty():
+#     stdin = sys.stdin.read()
+#     if stdin:
+#         process(stdin)
+# 
+# # process any filenames on the command line
+# with open('${vars_file}') as f:
+#   process(f.read())
+# "
+#   sorted_content=$(python -c "$process" | tr -d '\r')
+#   echo "${sorted_content}" | tee ${vars_file}
+# 
+# }
 
 alias tf=terraform
 alias tf.apply="terraform apply"
