@@ -81,20 +81,20 @@ function tvm()
   PATH="$(echo -e "$TERRAFORM_DIR/$1/:$PATH")"  
 } 
 
-alias tf=terraform
-
 function tf.plan.nocolor {
   USAGE="""
   Description: Outputs terraform plan to output file
   Usage:
-    ${FUNCNAME[0]} [--plan-prefix|-pp] <plan_prefix>
+    ${FUNCNAME[0]} [--plan-prefix|-pp] <plan_prefix> --- <extra_args>
   Examples:
     ${FUNCNAME[0]} -pp vpc-changes
+    ${FUNCNAME[0]} -pp vpc-changes --- -var myvar=myvalue
   """
 
   # args
   num_args=$#
   allargs=$*
+  plan_prefix=
   
   while (( "$#" )); do
     if [[ "$1" =~ ^--plan-name-prefix$|^-pp$ ]]; then plan_prefix="-${2}";shift;fi
@@ -108,6 +108,11 @@ function tf.plan.nocolor {
     return
   fi
 
+  if [[ $allargs =~ ' --- ' ]];then
+    nargs=${allargs##*---}
+    nargs=${nargs//--dry/}
+  fi
+
   plan_prefix_w_branch="$(git rev-parse --abbrev-ref HEAD | head -1)"
   if [[ -n $plan_prefix ]];then
     effective_plan_prefix="${plan_prefix_w_branch}${plan_prefix}"
@@ -116,11 +121,8 @@ function tf.plan.nocolor {
   fi
   plan_file=${effective_plan_prefix}-plan-$(date +%Y-%m-%d-%H-%M).txt
   echo "Saving output of 'terraform plan' to ${plan_file}"
-  terraform plan -no-color | tee ${plan_file}
-}
-
-function tf.init {
-  terraform init $@
+  terraform plan -no-color $nargs | tee ${plan_file}
 }
 
 alias tf=terraform
+alias tf.apply="terraform apply"
