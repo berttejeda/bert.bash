@@ -183,7 +183,7 @@ kubectl.logs(){
 	unset CONTAINER FOLLOW
 }
 
-kind.init.cluster(){
+kind.cluster.init(){
   BINARY=kind
   if ! [[ ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null)) || ($(which $BINARY)) ]];then
     echo "This function requires ${BINARY}"
