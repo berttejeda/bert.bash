@@ -183,6 +183,42 @@ kubectl.logs(){
 	unset CONTAINER FOLLOW
 }
 
+kind.init.cluster(){
+  BINARY=kind
+  if ! [[ ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null)) || ($(which $BINARY)) ]];then
+    echo "This function requires ${BINARY}"
+    echo "You can install it from https://github.com/kubernetes-sigs/kind/releases"
+    return
+  fi
+
+  echo "Creating cluster ..."
+cat <<EOF | kind create cluster \
+--name kind-k8s-cluster \
+--config=-
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30000
+    hostPort: 30000
+  - containerPort: 30001
+    hostPort: 30001
+- role: worker
+EOF
+  echo "Setting up kubernetes context"
+  if [[ ! -d $HOME/.kube ]];then mkdir $HOME/.kube;fi
+  if [[ -f $HOME/.kube/kind.yaml ]];then 
+    if $(confirm "Replace $HOME/.kube/kind.yaml");then
+      kind get kubeconfig | tee ~/.kube/kind.yaml;
+    else
+      echo "Skipping init of kubernetes context"
+    fi
+  fi
+  export KUBECONFIG=$(ls ~/.kube/*.yaml | tr '\n' ':')
+  kubectl config use-context kind-kind
+}
+
 minikube.reset(){
 	minikube config set cpus 4
 	minikube config set memory 4096
