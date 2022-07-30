@@ -183,7 +183,43 @@ kubectl.logs(){
 	unset CONTAINER FOLLOW
 }
 
-kind.cluster.init(){
+function kind.cluster.init(){
+
+  USAGE="""
+  Description: Creates a kind kubernetes cluster
+  Usage:
+    ${FUNCNAME[0]} [--cluster-name|-n] <cluster_name> --- <extra_args>
+  Examples:
+    ${FUNCNAME[0]} -n my-cluster
+    ${FUNCNAME[0]} -n my-cluster --- --quiet
+  """
+
+  # args
+  num_args=$#
+  allargs=$*
+  local k8s_control_plane_port_random=$[$[RANDOM%9000]+30000]
+  local k8s_worker_port_random=$[$[RANDOM%9000]+31000]
+  
+  while (( "$#" )); do
+    if [[ "$1" =~ ^--cluster-name$|^-n$ ]]; then local k8s_cluster_name="${2}";shift;fi
+    if [[ "$1" =~ ^--control-plane-port$|^-cp$ ]]; then local k8s_control_plane_port="${2}";shift;fi
+    if [[ "$1" =~ ^--worker-port$|^-cp$ ]]; then local k8s_worker_port="${2}";shift;fi
+    if [[ "$1" =~ ^--help$|^-h$ ]]; then local help=true;fi
+    if [[ "$1" =~ ^--dry$ ]]; then local PREFIX=echo;fi
+    shift
+  done
+
+  # Display help if applicable
+  if [[ -n $help ]];then 
+    echo -e "${USAGE}"
+    return
+  fi
+
+  if [[ $allargs =~ ' --- ' ]];then
+    nargs=${allargs##*---}
+    nargs=${nargs//--dry/}
+  fi
+
   BINARY=kind
   if ! [[ ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null)) || ($(which $BINARY)) ]];then
     echo "This function requires ${BINARY}"
@@ -192,18 +228,18 @@ kind.cluster.init(){
   fi
 
   echo "Creating cluster ..."
-cat <<EOF | kind create cluster \
---name kind-k8s-cluster \
+cat <<EOF | $PREFIX kind create cluster \
+--name ${k8s_cluster_name-kind-k8s-cluster} \
 --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
   extraPortMappings:
-  - containerPort: 30000
-    hostPort: 30000
-  - containerPort: 30001
-    hostPort: 30001
+  - containerPort: ${k8s_control_plane_port-${k8s_control_plane_port_random}}
+    hostPort: ${k8s_control_plane_port-${k8s_control_plane_port_random}}
+  - containerPort: ${k8s_worker_port-${k8s_worker_port_random}}
+    hostPort: ${k8s_worker_port-${k8s_worker_port_random}}
 - role: worker
 EOF
   echo "Setting up kubernetes context"
@@ -215,8 +251,10 @@ EOF
       echo "Skipping init of kubernetes context"
     fi
   fi
-  export KUBECONFIG=$(ls ~/.kube/*.yaml | tr '\n' ':')
-  kubectl config use-context kind-kind
+  local kind_k8s_context_name="kind-${k8s_cluster_name}"
+  eval "${PREFIX} kind --name ${k8s_cluster_name} get kubeconfig | tee ~/.kube/${kind_k8s_context_name}.yaml"
+  $PREFIX export KUBECONFIG=$(ls ~/.kube/*.yaml | tr '\n' ':')
+  $PREFIX kubectl config use-context "${kind_k8s_context_name}"
 }
 
 minikube.reset(){
