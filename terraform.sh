@@ -92,13 +92,12 @@ function tf.plan.nocolor {
   """
 
   # args
-  num_args=$#
-  allargs=$*
-  plan_prefix=
+  local num_args=$#
+  local allargs=$*
   
   while (( "$#" )); do
-    if [[ "$1" =~ ^--plan-name-prefix$|^-pp$ ]]; then plan_prefix="-${2}";shift;fi
-    if [[ "$1" =~ ^--help$|^-h$ ]]; then help=true;fi
+    if [[ "$1" =~ ^--plan-name-prefix$|^-pp$ ]]; then local plan_prefix="-${2}";shift;fi
+    if [[ "$1" =~ ^--help$|^-h$ ]]; then local help=true;fi
     shift
   done
   
@@ -110,16 +109,16 @@ function tf.plan.nocolor {
 
   if [[ $allargs =~ ' --- ' ]];then
     nargs=${allargs##*---}
-    nargs=${nargs//--dry/}
+    local nargs=${nargs//--dry/}
   fi
 
-  plan_prefix_w_branch="$(git rev-parse --abbrev-ref HEAD | head -1)"
+  local plan_prefix_w_branch="$(git rev-parse --abbrev-ref HEAD | head -1)"
   if [[ -n $plan_prefix ]];then
-    effective_plan_prefix="${plan_prefix_w_branch}${plan_prefix}"
+   local effective_plan_prefix="${plan_prefix_w_branch}${plan_prefix}"
   else
-    effective_plan_prefix="${plan_prefix_w_branch}"
+   local effective_plan_prefix="${plan_prefix_w_branch}"
   fi
-  plan_file=${effective_plan_prefix}-plan-$(date +%Y-%m-%d-%H-%M).txt
+  local plan_file=${effective_plan_prefix}-plan-$(date +%Y-%m-%d-%H-%M).txt
   echo "Saving output of 'terraform plan' to ${plan_file}"
   terraform plan -no-color $nargs | tee ${plan_file}
 }
