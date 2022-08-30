@@ -4,7 +4,18 @@
 # GOPATH is the location of your work directory. 
 # e.g. ~/HOME/go/projects
 
+
+py_BINARY=python3
+if ! [[ ($(type /usr/{,local/}{,s}bin/${py_BINARY} 2> /dev/null)) || ($(which $py_BINARY)) ]];then
+	py_BINARY=python
+fi
+
+if [[ -n $os_is_osx ]];then 
+	py_BINPATH="$(${py_BINARY} -m site --user-base)/bin"
+fi
+
 PATHS="""
+${py_BINPATH}
 ${LOCALAPPDATA}/Programs/Git/mingw64/bin
 /c/git-sdk-64
 /c/Progra~1/OpenSSL/bin
