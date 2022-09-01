@@ -17,6 +17,10 @@ if [[ $os_is_windows ]]; then
   }
 fi
 
+conda.init(){
+  conda init bash
+}
+
 conda.install(){
   echo "Downloading Anaconda python env manager ..."
   if [[ "$OSTYPE" =~ .*darwin.* ]]; then installer_url="https://repo.continuum.io/archive/Anaconda2-4.2.0-MacOSX-x86_64.sh";fi
@@ -28,16 +32,38 @@ conda.install(){
 }
 
 conda.env.create(){
-  if [ $# -lt 1 ]; then echo "Usage: ${FUNCNAME[0]} <virtualenv_name> [python=<version>](optional)"; return 1; fi
-  environment=$1
-  ver=${2-2.7}
+
   BINARY=conda
   if ! [[ ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null)) || ($(which $BINARY)) ]];then
     echo "This function requires $BINARY, see installation instructions: https://www.continuum.io/downloads"
     return 1
-  else
-    conda create --name ${environment} python=$ver
-  fi  
+  fi
+
+  local USAGE="""Usage: ${FUNCNAME[0]} 
+  --environment-name|-n <virtualenv_name> 
+  --python-version$ |-v <python_version> (optional)
+  """
+
+  # args
+  local num_args=$#
+  local allargs=$*
+  local python_ver_default=3.7
+
+  while (( "$#" )); do
+    if [[ "$1" =~ ^--environment-name$|^-n$ ]]; then local environment_name="${2}";shift;fi
+    if [[ "$1" =~ ^--python-version$|^-v$ ]]; then local python_version="${2}";shift;fi
+    if [[ "$1" =~ ^--help$|^-h$ ]]; then local help=true;fi
+    shift
+  done
+  
+  # Display help if applicable
+  if [[ (-n $help) || (-z $environment_name) ]];then 
+    echo -e "${USAGE}"
+    return
+  fi
+
+  conda create --name "${environment_name}" python="${python_ver-$python_ver_default}"
+
 }
 
 conda.env.list(){
