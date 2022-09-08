@@ -47,7 +47,7 @@ conda.env.create(){
   # args
   local num_args=$#
   local allargs=$*
-  local python_ver_default=3.7
+  local python_version_default=3.7
 
   while (( "$#" )); do
     if [[ "$1" =~ ^--environment-name$|^-n$ ]]; then local environment_name="${2}";shift;fi
@@ -62,7 +62,7 @@ conda.env.create(){
     return
   fi
 
-  conda create --name "${environment_name}" python="${python_ver-$python_ver_default}"
+  conda create --name "${environment_name}" python="${python_version-$python_version_default}"
 
 }
 
