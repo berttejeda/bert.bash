@@ -55,6 +55,7 @@ ${HOME}/ProgramData/nvm
 ${HOME}/.local/bin
 ${HOME}/.githooks
 /c/Progra~1/Amazon/AWSSAMCLI/bin
+/c/Progra~1/Amazon/SessionManagerPlugin/bin
 ${HOME}/bin
 """
 exclusions="/c/Program Files/Git/bin/git"
