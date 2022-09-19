@@ -1,6 +1,11 @@
 # java
 java.run(){ javac "${1}.java" && java "${1%.**}"; }
 
+BINARY=jenv
+if [[ ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null) || $(which $BINARY))  ]]; then
+  eval "$(jenv init -)"
+fi
+
 # nodejs
 BINARY=brew
 if [[ ("$OSTYPE" =~ .*darwin.*) && ($(type /usr/{,local/}{,s}bin/${BINARY} 2> /dev/null) || $(which $BINARY))  ]]; then
